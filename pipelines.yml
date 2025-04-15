@@ -1,0 +1,5 @@
+- pipeline.id: erpnext_logs 
+  path.config: "/usr/share/logstash/pipeline/erpnext_logs.conf"
+
+- pipeline.id: docker_logs
+  path.config: "/usr/share/logstash/pipeline/docker_logs.conf"
