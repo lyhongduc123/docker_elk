@@ -33,23 +33,7 @@ cd docker_elk
 
 ---
 
-### 2. Start the ELK stack
-
-```bash
-docker compose up -d
-```
-
-This launches:
-
-- Elasticsearch on port `9200`
-- Logstash on port `5000`,`12201/udp`
-- Kibana on `http://localhost:5601`
-
-> ℹ️ Logstash is preconfigured to listen for GELF logs on port **12201/udp**.
-
----
-
-### 3. Start Frappe
+### 2. Start Frappe
 
 If you’re running a separate **Frappe Docker Compose** (3rd-party), connect it to the ELK network (or Logstash to the 3rd-party network):
 
@@ -69,6 +53,21 @@ docker compose -f pwd.yml up -d
 
 ---
 
+### 3. Start the ELK stack
+
+```bash
+docker compose up -d
+```
+
+This launches:
+
+- Elasticsearch on port `9200`
+- Logstash on port `5000`,`12201/udp`
+- Kibana on `http://localhost:5601`
+
+> ℹ️ Logstash is preconfigured to listen for GELF logs on port **12201/udp**.
+---
+
 ## 🔍 Verify in Kibana
 
 1. Visit [http://localhost:5601](http://localhost:5601)
@@ -86,6 +85,8 @@ Change your hosts in your local so that browser don't reset the session
 After that 
 - Kibana is at [http://kibana.local:5601](http://kibana.local:5601)
 - Frappe is at [http://app.local:8080](http://app.local:8080)
+
+---
 
 ## 🛠️ Logstash Config (logstash_pipelines/your_pipelines.conf)
 
@@ -140,8 +141,10 @@ docker compose -f pwd.yml down -v
 
 - Make sure both Logstash and Frappe services are in the **same Docker network**.
 - The gelf-address should be send to **127.0.0.1** not the container (localhost won't work)
+- Logstash in this project mount Frappe's logs volume, that is why you need to run Frappe first
 - You don't need to directly modify the 3rd compose (pwd.yml), you can create a override yml file and specify it when build
 
+Example:
 ```yaml
 services:
   frontend:
@@ -155,5 +158,9 @@ services:
 
 networks:
   docker_elk_frappe_network:
-    external: true
+    driver: bridge
 ```
+
+Consider: 
+- Creating your own share network between Logstash and 3rd party before compose. 
+- Or add Logstash to the 3rd party's network after running ELK
