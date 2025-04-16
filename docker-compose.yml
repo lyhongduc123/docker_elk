@@ -15,8 +15,8 @@ volumes:
 networks:
   default:
     driver: bridge
-  frappe_network :
-    driver: bridge
+  docker_elk_frappe_network:
+    external: true
 
 services:
   setup:
@@ -191,6 +191,6 @@ services:
       - ELASTIC_HOSTS=https://es01:9200
     networks:
       - default
-      - frappe_network
+      - docker_elk_frappe_network
     restart:
       unless-stopped
