@@ -86,6 +86,13 @@ After that
 - Kibana is at [http://kibana.local:5601](http://kibana.local:5601)
 - Frappe is at [http://app.local:8080](http://app.local:8080)
 
+**Login Kibana with default user:**
+- Username: elastic
+- Password: (.env password, default is changeme)
+
+**Login ERPNext with default user:**
+- Username: Administrator
+- Password: admin
 ---
 
 ## 🛠️ Logstash Config (logstash_pipelines/your_pipelines.conf)
