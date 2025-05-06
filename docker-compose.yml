@@ -1,5 +1,3 @@
-version: '4.3'
-
 volumes:
   certificates:
     driver: local
@@ -8,6 +6,8 @@ volumes:
   kibanadata:
     driver: local
   logstashdata01:
+    driver: local
+  filebeatdata01:
     driver: local
   frappe_docker_logs:
     external: true
@@ -191,6 +191,11 @@ services:
       - default
     restart:
       unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9600"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
 
 
@@ -203,17 +208,20 @@ services:
       logstash01:
         condition: service_healthy
     image: docker.elastic.co/beats/filebeat:${STACK_VERSION}
-    user: root
     volumes:
-     - certs:/usr/share/filebeat/certs
+     - certificates:/usr/share/filebeat/certificates
      - filebeatdata01:/usr/share/filebeat/data
      - ./filebeat_ingest_data/:/usr/share/filebeat/ingest_data/
      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-     - /var/lib/docker/containers:/var/lib/docker/containers:ro
-     - /var/run/docker.sock:/var/run/docker.sock:ro"
+    #  - /var/lib/docker/containers:/var/lib/docker/containers:ro
+     - /var/run/docker.sock:/var/run/docker.sock:ro
+     - /c/Users/ASUS/AppData/Local/Docker/log:/docker_network_logs:ro
     environment:
-     - ELASTIC_USER=elastic
-     - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-     - ELASTIC_HOSTS=https://es01:9200
-     - KIBANA_HOSTS=http://kibana:5601
-     - LOGSTASH_HOSTS=http://logstash01:5000
+     - BEAT_STRICT_PERMS=false
+    #  - ELASTIC_USER=elastic
+    #  - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    #  - ELASTIC_HOSTS=https://es01:9200
+    #  - KIBANA_HOSTS=http://kibana:5601
+    #  - LOGSTASH_HOSTS=http://logstash01:9600
+    networks:
+      - default
