@@ -3,3 +3,6 @@
 
 - pipeline.id: docker_logs
   path.config: "/usr/share/logstash/pipeline/docker_logs.conf"
+
+- pipeline.id: docker_deamon_logs
+  path.config: "/usr/share/logstash/pipeline/docker_deamon_logs.conf"

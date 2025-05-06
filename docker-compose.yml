@@ -180,6 +180,7 @@ services:
       - ./logstash_pipelines/:/usr/share/logstash/pipeline
       #  - "./logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro"
       - ./pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro
+      - /c/Users/ASUS/AppData/Local/Docker/log:/docker_network_logs:ro
     ports:
         - 5000:5000/tcp
         - 5000:5000/udp
