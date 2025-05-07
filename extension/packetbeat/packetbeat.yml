@@ -1,0 +1,45 @@
+packetbeat.interfaces.device: any
+packetbeat.procs.enabled: true
+
+packetbeat.flows:
+  timeout: 30s
+  period: 10s
+
+packetbeat.protocols:
+  - type: dns
+    ports: [53]
+  - type: http
+    ports: [80, 8080]
+  - type: mysql
+    ports: [3306, 3307]
+  - type: dhcpv4
+    ports: [67, 68]
+  - type: redis
+    ports: [6379]
+
+packetbeat.modules:
+- module: docker
+  enabled: true
+  period: 10s
+  processors:
+    - add_docker_metadata: ~
+
+setup.kibana:
+  host: ${KIBANA_HOSTS}
+  enabled: true
+  username: ${ELASTIC_USER}
+  password: ${ELASTIC_PASSWORD}
+  ssl:
+    certificate: "certificates/es01/es01.crt"
+    certificate_authorities: "certificates/ca/ca.crt"
+    key: "certificates/es01/es01.key"
+    
+
+output.elasticsearch:
+  hosts: ${ELASTIC_HOSTS}
+  username: ${ELASTIC_USER}
+  password: ${ELASTIC_PASSWORD}
+  ssl:
+    certificate: "certificates/es01/es01.crt"
+    certificate_authorities: "certificates/ca/ca.crt"
+    key: "certificates/es01/es01.key"

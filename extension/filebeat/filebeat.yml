@@ -1,0 +1,60 @@
+filebeat.inputs:
+  - type: filestream
+    id: ingest-data
+    enabled: true
+    paths:
+      - ingest_data/*.log
+    tags: ["ingest-data"]
+
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+      templates:
+        - config:
+            - type: container
+              stream: stdout
+              paths:
+                - /var/lib/docker/containers/${data.docker.container.id}/*-json.log
+              tags: ["docker-${data.docker.container.name}", "docker-container", "container-${data.docker.container.id}"]
+
+              
+
+processors:
+  - add_docker_metadata: ~
+
+  - drop_event:
+      when:
+        or:
+          - regexp:
+              container.image.name: ".*logstash.*"
+          - regexp:
+              container.image.name: ".*filebeat.*"
+          - regexp:
+              container.image.name: ".*kibana.*"
+          - regexp:
+              container.image.name: ".*elasticsearch.*"
+          - regexp:
+              container.name: ".*logstash.*"
+          - regexp:
+              container.name: ".*filebeat.*"
+          - regexp:
+              container.name: ".*kibana.*"
+          - regexp:
+              container.name: ".*elasticsearch.*"
+
+
+monitoring:
+enabled: true
+elasticsearch:
+  hosts: ["http://es01:9200"]
+  username: beats_system
+  password: ${BEATS_SYSTEM_PASSWORD}
+
+
+output.logstash:
+  hosts: ["logstash01:5044"]
+
+# output.console:
+#   pretty: true

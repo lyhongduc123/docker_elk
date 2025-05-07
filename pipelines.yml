@@ -1,3 +1,11 @@
+- pipeline.id: delivery
+  path.config: "/usr/share/logstash/pipeline/delivery.conf"
+
+# - pipeline.id: docker_deamon_logs
+#   path.config: "/usr/share/logstash/pipeline/docker_deamon_logs.conf"
+- pipeline.id: file_logs
+  path.config: "/usr/share/logstash/pipeline/file_logs.conf"
+
 - pipeline.id: erpnext_logs 
   path.config: "/usr/share/logstash/pipeline/erpnext_logs.conf"
 

@@ -7,7 +7,11 @@ volumes:
     driver: local
   logstashdata01:
     driver: local
+  metricbeatdata01:
+   driver: local
   filebeatdata01:
+    driver: local
+  packetbeatdata01:
     driver: local
   frappe_docker_logs:
     external: true
@@ -175,9 +179,9 @@ services:
       - certificates:/usr/share/logstash/certificates
       - logstashdata01:/usr/share/logstash/data
       - frappe_docker_logs:/home/frappe/frappe-bench/logs
-      - ./logstash_pipelines/:/usr/share/logstash/pipeline
-      - ./logstash_ingest_data/:/usr/share/logstash/ingest_data/
-      - ./pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro
+      - "./logstash_pipelines/:/usr/share/logstash/pipeline"
+      - "./logstash_ingest_data/:/usr/share/logstash/ingest_data/"
+      - "./pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro"
     ports:
         - 5044:5044/tcp
         - 5044:5044/udp
@@ -200,28 +204,78 @@ services:
 
 
 
-
   filebeat01:
     depends_on:
       es01:
         condition: service_healthy
-      logstash01:
-        condition: service_healthy
     image: docker.elastic.co/beats/filebeat:${STACK_VERSION}
+    user: root
     volumes:
      - certificates:/usr/share/filebeat/certificates
      - filebeatdata01:/usr/share/filebeat/data
-     - ./filebeat_ingest_data/:/usr/share/filebeat/ingest_data/
-     - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-    #  - /var/lib/docker/containers:/var/lib/docker/containers:ro
-     - /var/run/docker.sock:/var/run/docker.sock:ro
-     - /c/Users/ASUS/AppData/Local/Docker/log:/docker_network_logs:ro
+     - "./extension/filebeat/filebeat_ingest_data/:/usr/share/filebeat/ingest_data/"
+     - "./extension/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro"
+     - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+     - "/var/run/docker.sock:/var/run/docker.sock:ro"
+     - "/c/Users/ASUS/AppData/Local/Docker/log:/docker_network_logs:ro"
     environment:
      - BEAT_STRICT_PERMS=false
-    #  - ELASTIC_USER=elastic
-    #  - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    #  - ELASTIC_HOSTS=https://es01:9200
-    #  - KIBANA_HOSTS=http://kibana:5601
-    #  - LOGSTASH_HOSTS=http://logstash01:9600
+     - ELASTIC_USER=elastic
+     - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+     - ELASTIC_HOSTS=https://es01:9200
+     - KIBANA_HOSTS=http://kibana:5601
+     - LOGSTASH_HOSTS=http://logstash01:9600
     networks:
       - default
+
+  metricbeat01:
+    depends_on:
+      es01:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+    image: docker.elastic.co/beats/metricbeat:${STACK_VERSION}
+    user: root
+    volumes:
+      - certificates:/usr/share/metricbeat/certificates
+      - metricbeatdata01:/usr/share/metricbeat/data
+      - "./extension/metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro"
+      - "/proc:/hostfs/proc:ro"
+      - "/:/hostfs:ro"
+    environment:
+      - BEAT_STRICT_PERMS=false
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://es01:9200
+      - KIBANA_HOSTS=http://kibana:5601
+      - LOGSTASH_HOSTS=http://logstash01:9600
+
+  packetbeat01:
+    depends_on:
+      es01:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+    image: docker.elastic.co/beats/packetbeat:${STACK_VERSION}
+    user: root
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - packetbeatdata01:/usr/share/packetbeat/data
+      - certificates:/usr/share/packetbeat/certificates
+      - "./extension/packetbeat/packetbeat.yml:/usr/share/packetbeat/packetbeat.yml:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro"
+      - "/proc:/hostfs/proc:ro"
+      - "/:/hostfs:ro"
+    environment:
+      - BEAT_STRICT_PERMS=false
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://localhost:9200
+      - KIBANA_HOSTS=http://localhost:5601
+      - LOGSTASH_HOSTS=http://localhost:9600
