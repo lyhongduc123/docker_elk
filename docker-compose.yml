@@ -217,7 +217,6 @@ services:
      - "./extension/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro"
      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-     - "/c/Users/ASUS/AppData/Local/Docker/log:/docker_network_logs:ro"
     environment:
      - BEAT_STRICT_PERMS=false
      - ELASTIC_USER=elastic
