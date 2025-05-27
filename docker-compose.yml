@@ -13,6 +13,8 @@ volumes:
     driver: local
   packetbeatdata01:
     driver: local
+  kafka_data:
+    driver: local
   frappe_docker_logs:
     external: true
 
@@ -80,6 +82,7 @@ services:
       - default
 
 
+  #--------------#
   es01:
     depends_on:
       setup:
@@ -128,6 +131,7 @@ services:
     restart: unless-stopped
 
 
+  #--------------#
   kibana:
     depends_on:
       es01:
@@ -164,7 +168,7 @@ services:
     restart: unless-stopped
 
 
-
+  #--------------#
   logstash01:
     depends_on:
       es01:
@@ -202,8 +206,7 @@ services:
       retries: 5
 
 
-
-
+  #--------------#
   filebeat01:
     depends_on:
       es01:
@@ -227,6 +230,8 @@ services:
     networks:
       - default
 
+
+  #--------------#
   metricbeat01:
     depends_on:
       es01:
@@ -251,6 +256,8 @@ services:
       - KIBANA_HOSTS=http://kibana:5601
       - LOGSTASH_HOSTS=http://logstash01:9600
 
+
+  #--------------#
   packetbeat01:
     depends_on:
       es01:
@@ -278,3 +285,36 @@ services:
       - ELASTIC_HOSTS=https://localhost:9200
       - KIBANA_HOSTS=http://localhost:5601
       - LOGSTASH_HOSTS=http://localhost:9600
+
+
+  #--------------#
+  zookeeper:
+    container_name: zookeeper
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 2181:2181
+
+
+  #--------------#
+  kafka:
+    container_name: kafka
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+      - 9092:9092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - default

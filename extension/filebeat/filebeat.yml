@@ -19,7 +19,6 @@ filebeat.autodiscover:
                 - /var/lib/docker/containers/${data.docker.container.id}/*-json.log
               tags: ["docker-${data.docker.container.name}", "docker-container", "container-${data.docker.container.id}"]
 
-              
 
 processors:
   - add_docker_metadata: ~
@@ -53,8 +52,17 @@ elasticsearch:
   password: ${BEATS_SYSTEM_PASSWORD}
 
 
-output.logstash:
-  hosts: ["logstash01:5044"]
+output.kafka:
+  hosts: ["kafka:9092"]
+  topic: "docker-logs"
+  codec.json:
+    pretty: false
+  required_acks: 1
+  compression: "gzip"
+  max_message_bytes: 1000000
+
+# output.logstash:
+#   hosts: ["logstash01:5044"]
 
 # output.console:
 #   pretty: true
