@@ -1,8 +1,6 @@
 - pipeline.id: delivery
   path.config: "/usr/share/logstash/pipeline/delivery.conf"
 
-# - pipeline.id: docker_deamon_logs
-#   path.config: "/usr/share/logstash/pipeline/docker_deamon_logs.conf"
 - pipeline.id: file_logs
   path.config: "/usr/share/logstash/pipeline/file_logs.conf"
 
@@ -11,3 +9,6 @@
 
 - pipeline.id: docker_logs
   path.config: "/usr/share/logstash/pipeline/docker_logs.conf"
+
+- pipeline.id: frappe_logs
+  path.config: "/usr/share/logstash/pipeline/frappe_logs.conf"
